@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Item | Inventory Management System</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #ff6a00, #ee0979, #8e2de2, #4a00e0, #00c6ff, #0072ff);
+      background-size: 600% 600%;
+      animation: gradientShift 12s ease infinite;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+      color: #fff;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(18px);
+      padding: 60px 50px;
+      border-radius: 25px;
+      width: 550px;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+      animation: fadeIn 1s ease-in-out;
+      transition: 0.4s;
+    }
+
+    .container:hover {
+      transform: scale(1.03);
+      box-shadow: 0 0 25px rgba(255,255,255,0.3);
+    }
+
+    h2 {
+      margin-bottom: 25px;
+      font-size: 32px;
+      letter-spacing: 1.5px;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 0 10px rgba(255,255,255,0.6);
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      text-align: left;
+    }
+
+    input, textarea {
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      font-size: 17px;
+      outline: none;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.9);
+      color: #333;
+      transition: all 0.3s;
+    }
+
+    input:focus, textarea:focus {
+      box-shadow: 0 0 15px #00ffe0;
+      transform: scale(1.03);
+    }
+
+    textarea {
+      resize: none;
+      height: 100px;
+    }
+
+    input[type="file"] {
+      background: rgba(255, 255, 255, 0.95);
+      cursor: pointer;
+      padding: 12px;
+      border-radius: 10px;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 16px;
+      color: #fff;
+      margin-top: 5px;
+    }
+
+    button {
+      background: linear-gradient(90deg, #ff512f, #dd2476, #24c6dc);
+      background-size: 200% auto;
+      color: white;
+      border: none;
+      padding: 15px;
+      border-radius: 50px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 5px 15px rgba(255, 255, 255, 0.4);
+    }
+
+    button:hover {
+      background-position: right center;
+      color: #000;
+      transform: scale(1.07);
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.7);
+    }
+
+    .back-link {
+      display: block;
+      margin-top: 25px;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 16px;
+      transition: 0.3s;
+      text-align: center;
+    }
+
+    .back-link:hover {
+      color: #ffcc00;
+      text-decoration: underline;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        width: 90%;
+        padding: 40px 25px;
+      }
+
+      h2 {
+        font-size: 26px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>🌈 Add New Product</h2>
+
+    <form id="addItemForm">
+      <input type="text" id="itemName" placeholder="Enter Product Name" required />
+      <input type="text" id="category" placeholder="Enter Category" required />
+      <input type="number" id="stock" placeholder="Enter Stock Quantity" required min="1" />
+      <input type="number" id="price" placeholder="Enter Price (₹)" required step="0.01" />
+      <textarea id="description" placeholder="Enter Description (optional)"></textarea>
+
+      <label>Upload Product Image:</label>
+      <input type="file" id="itemImage" accept="image/*" required />
+
+      <button type="submit">💾 Save Product</button>
+    </form>
+
+    <a href="index.html" class="back-link"> ← Back to Dashboard</a>
+  </div>
+
+  <script>
+    const form = document.getElementById('addItemForm');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById('itemName').value.trim();
+      const category = document.getElementById('category').value.trim();
+      const stock = document.getElementById('stock').value;
+      const price = document.getElementById('price').value;
+      const desc = document.getElementById('description').value.trim();
+      const imageInput = document.getElementById('itemImage');
+      const file = imageInput.files[0];
+
+      if (!file) {
+        alert("⚠️ Please upload an image!");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const imageURL = e.target.result;
+
+        const newProduct = {
+          name,
+          category,
+          stock,
+          price,
+          description: desc,
+          image: imageURL
+        };
+
+        let products = JSON.parse(localStorage.getItem('products')) || [];
+        products.push(newProduct);
+        localStorage.setItem('products', JSON.stringify(products));
+
+        alert(`✅ ${name} added successfully!`);
+        form.reset();
+      };
+      reader.readAsDataURL(file);
+    });
+  </script>
+
+</body>
+</html>
