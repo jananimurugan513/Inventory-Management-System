@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>View Products | Inventory Management System</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #fde2e4, #fad2e1, #c5dedd, #dbe7e4);
+      background-size: 200% 200%;
+      animation: bgMove 12s ease-in-out infinite;
+      min-height: 100vh;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    @keyframes bgMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    h2 {
+      color: #e94e77;
+      text-align: center;
+      font-size: 38px;
+      margin-bottom: 25px;
+      letter-spacing: 2px;
+      text-shadow: 0 0 8px rgba(233, 78, 119, 0.3);
+    }
+
+    .search-container {
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 50px;
+      display: flex;
+      justify-content: center;
+      position: relative;
+    }
+
+    .search-container input {
+      width: 100%;
+      padding: 18px 55px 18px 25px;
+      border-radius: 50px;
+      border: none;
+      outline: none;
+      font-size: 18px;
+      font-weight: 500;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      background: rgba(255, 255, 255, 0.8);
+      transition: all 0.3s ease;
+    }
+
+    .search-container input:focus {
+      box-shadow: 0 0 15px rgba(233, 78, 119, 0.6);
+      background: #fff;
+      transform: scale(1.02);
+    }
+
+    .search-container i {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #666;
+      font-size: 24px;
+      pointer-events: none;
+    }
+
+    .product-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 40px;
+      width: 100%;
+      max-width: 1200px;
+      justify-content: center;
+    }
+
+    .product-card {
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 20px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      text-align: center;
+      transition: 0.4s;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    .product-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 10px 30px rgba(233, 78, 119, 0.3);
+    }
+
+    .product-card img {
+      width: 180px;
+      height: 180px;
+      object-fit: contain;
+      margin-top: 20px;
+      transition: 0.3s;
+      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.4));
+    }
+
+    .product-card:hover img {
+      transform: scale(1.05);
+    }
+
+    .product-info {
+      padding: 20px;
+    }
+
+    .product-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: #222;
+      margin-bottom: 8px;
+    }
+
+    .price {
+      color: #0078d7;
+      font-weight: 600;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    .description {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 10px;
+    }
+
+    .category, .stock {
+      font-size: 13px;
+      color: #666;
+      margin: 3px 0;
+    }
+
+    .btn-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: none;
+      border-radius: 25px;
+      padding: 10px 22px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .buy-btn {
+      background: linear-gradient(90deg, #fbc2eb, #a6c1ee);
+    }
+
+    .edit-btn {
+      background: linear-gradient(90deg, #84fab0, #8fd3f4);
+    }
+
+    .delete-btn {
+      background: linear-gradient(90deg, #ff9a9e, #fecfef);
+    }
+
+    button:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+
+    .back-link {
+      margin-top: 50px;
+      text-decoration: none;
+      color: #0078d7;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+
+    .back-link:hover {
+      color: #e94e77;
+      text-shadow: 0 0 8px #e94e77;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>✨ Manage Products</h2>
+
+  <div class="search-container">
+    <input type="text" id="searchInput" placeholder="Search product name...">
+    <i>🔍</i>
+  </div>
+
+  <div class="product-container" id="productList"></div>
+
+  <a href="index.html" class="back-link">← Back to Dashboard</a>
+
+  <script>
+    const productList = document.getElementById('productList');
+    let products = JSON.parse(localStorage.getItem('products')) || [];
+
+    function displayProducts(list) {
+      productList.innerHTML = "";
+      if (list.length === 0) {
+        productList.innerHTML = "<p style='color:#555; text-align:center; width:100%; font-size:18px;'>No products found.</p>";
+        return;
+      }
+
+      list.forEach((p, index) => {
+        const card = document.createElement('div');
+        card.classList.add('product-card');
+
+        card.innerHTML = `
+          <img src="${p.image}" alt="${p.name}">
+          <div class="product-info">
+            <div class="product-name">${p.name}</div>
+            <div class="price">₹${p.price}</div>
+            <div class="description">${p.description}</div>
+            <div class="category">Category: ${p.category}</div>
+            <div class="stock">Stock: ${p.stock}</div>
+            <div class="btn-container">
+              <button class="buy-btn">💸 Buy</button>
+              <button class="edit-btn">✏️ Edit</button>
+              <button class="delete-btn">🗑 Delete</button>
+            </div>
+          </div>
+        `;
+
+        // Buy
+        card.querySelector('.buy-btn').addEventListener('click', () => {
+          localStorage.setItem('selectedProduct', JSON.stringify(p));
+          window.location.href = "buy.html";
+        });
+
+        // Edit
+        card.querySelector('.edit-btn').addEventListener('click', () => {
+          const newName = prompt("Edit product name:", p.name);
+          const newPrice = prompt("Edit price:", p.price);
+          const newStock = prompt("Edit stock:", p.stock);
+          if (newName && newPrice && newStock) {
+            products[index].name = newName;
+            products[index].price = newPrice;
+            products[index].stock = newStock;
+            localStorage.setItem('products', JSON.stringify(products));
+            displayProducts(products);
+          }
+        });
+
+        // Delete
+        card.querySelector('.delete-btn').addEventListener('click', () => {
+          if (confirm(`Delete ${p.name}?`)) {
+            products.splice(index, 1);
+            localStorage.setItem('products', JSON.stringify(products));
+            displayProducts(products);
+          }
+        });
+
+        productList.appendChild(card);
+      });
+    }
+
+    displayProducts(products);
+
+    // Search
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      const filtered = products.filter(p => p.name.toLowerCase().includes(query));
+      displayProducts(filtered);
+    });
+  </script>
+</body>
+</html>
